@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit as st
 import pandas as pd
 from datetime import datetime
 from src.utils import read_blob, write_blob, add_row_blob
@@ -11,9 +10,13 @@ import plotly.graph_objects as go
 mode = Keys.CONTRACTION
 mode_prim = Keys.CONTRACTION_PRIMARY
 
-col1, col2 = st.columns(2)
-start = col1.button("START CONTRAPTION!")
-end = col2.button("END CONTRAPTION!")
+df = read_blob(mode)
+status = "End" if df.empty else df[df["Timestamp"] == df["Timestamp"].max()]["Type"].values[0]
+
+if status == "End":
+    button = st.button("START CONTRAPTION!")
+else :
+    button = st.button("END CONTRAPTION!")
 # st.session_state.Intensity = "low"
 # def set_intensity(level):
 #     st.session_state.Intensity = level
@@ -31,24 +34,27 @@ end = col2.button("END CONTRAPTION!")
 #     level = "high"
 #     if st.button(level, on_click=set_intensity, args=(level,)):
 #         st.session_state.Intensity = level
+
+col1, col2 = st.columns(2)
 calendar = col1.date_input("Data", datetime.now())
 hour = col2.time_input("Ora", value=datetime.now(), step=60)
-if start:
-    row =  {
-        "Timestamp": f"{calendar} {hour}",
-        "Type": "Start",
-        "Intensity": "",
-        "Note": ""
-    },
-    add_row_blob(mode, row)
-if end:
-    row =  {
-        "Timestamp": f"{calendar} {hour}",
-        "Type": "End",
-        "Intensity": "", # st.session_state.Intensity,
-        "Note": ""
-    },
-    add_row_blob(mode, row)
+if button:
+    if status == "End":
+        row =  {
+            "Timestamp": f"{calendar} {hour}",
+            "Type": "Start",
+            "Intensity": "",
+            "Note": ""
+        },
+        add_row_blob(mode, row)
+    if status == "Start":
+        row =  {
+            "Timestamp": f"{calendar} {hour}",
+            "": "End",
+            "Intensity": "", # st.session_state.Intensity,
+            "Note": ""
+        },
+        add_row_blob(mode, row)
 with st.expander("Visualizza le contrazioni"):
     df = read_blob(mode)
     df = st.data_editor(df, num_rows="dynamic")
