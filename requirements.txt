@@ -3,3 +3,4 @@ pandas
 azure-storage-blob
 python-dotenv
 plotly
+pydub==0.25.1
